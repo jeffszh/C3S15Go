@@ -1,15 +1,17 @@
 package main
 
 import (
+	"fmt"
 	"github.com/lxn/walk"
 	. "github.com/lxn/walk/declarative"
 	"strings"
+	"time"
 )
 
 func main() {
 	var inTE, outTE *walk.TextEdit
 
-	MainWindow{
+	mainWnd := MainWindow{
 		Title:   "输入几个中文吧。",
 		MinSize: Size{600, 400},
 		Layout:  VBox{},
@@ -29,5 +31,12 @@ func main() {
 		},
 		OnMouseDown: func(x, y int, button walk.MouseButton) {
 		},
-	}.Run()
+	}
+	go func() {
+		time.Sleep(3 * time.Second)
+		fmt.Println(mainWnd.Bounds)
+		mainWnd.Bounds.X = 300
+		fmt.Println(mainWnd.Bounds)
+	}()
+	mainWnd.Run()
 }
