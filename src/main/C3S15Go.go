@@ -49,9 +49,8 @@ func main() {
 				mainWndP.Width(), mainWndP.Height())
 		},
 		OnBoundsChanged: func() {
-			fmt.Println("OnBoundsChanged:{")
-			fmt.Println(mainWndP.Bounds())
-			fmt.Println("}")
+			fmt.Println("OnBoundsChanged: " +
+				fmt.Sprint(mainWndP.Bounds()))
 		},
 		AssignTo: &mainWndP,
 	}
