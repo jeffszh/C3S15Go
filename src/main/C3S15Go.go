@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/lxn/walk"
 	. "github.com/lxn/walk/declarative"
+	"github.com/lxn/win"
 	"strings"
 	"time"
 )
@@ -11,10 +12,21 @@ import (
 func main() {
 	var inTE, outTE *walk.TextEdit
 
+	screenWidth := win.GetSystemMetrics(win.SM_CXSCREEN)
+	screenHeight := win.GetSystemMetrics(win.SM_CYSCREEN)
+	wndWidth := 800
+	wndHeight := 600
+	var mainWndP *walk.MainWindow
 	mainWnd := MainWindow{
 		Title:   "输入几个中文吧。",
-		MinSize: Size{600, 400},
-		Layout:  VBox{},
+		MinSize: Size{Width: 600, Height: 400},
+		Bounds: Rectangle{
+			X:      (int(screenWidth) - wndWidth) / 2,
+			Y:      (int(screenHeight) - wndHeight) / 2,
+			Width:  wndWidth,
+			Height: wndHeight,
+		},
+		Layout: VBox{},
 		Children: []Widget{
 			HSplitter{
 				Children: []Widget{
@@ -25,18 +37,29 @@ func main() {
 			PushButton{
 				Text: "SCREAM",
 				OnClicked: func() {
-					outTE.SetText(strings.ToUpper(inTE.Text()))
+					_ = outTE.SetText(strings.ToUpper(inTE.Text()))
 				},
 			},
 		},
 		OnMouseDown: func(x, y int, button walk.MouseButton) {
 		},
+		OnSizeChanged: func() {
+			fmt.Printf("X=%d，Y=%d，宽度=%d，高度=%d\n",
+				mainWndP.X(), mainWndP.Y(),
+				mainWndP.Width(), mainWndP.Height())
+		},
+		OnBoundsChanged: func() {
+			fmt.Println("OnBoundsChanged:{")
+			fmt.Println(mainWndP.Bounds())
+			fmt.Println("}")
+		},
+		AssignTo: &mainWndP,
 	}
 	go func() {
 		time.Sleep(3 * time.Second)
-		fmt.Println(mainWnd.Bounds)
+		fmt.Println(mainWndP.Bounds())
 		mainWnd.Bounds.X = 300
-		fmt.Println(mainWnd.Bounds)
+		fmt.Println(mainWndP.Bounds())
 	}()
-	mainWnd.Run()
+	_, _ = mainWnd.Run()
 }
