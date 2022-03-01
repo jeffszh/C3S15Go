@@ -18,7 +18,7 @@ func main() {
 	wndHeight := 600
 	var mainWndP *walk.MainWindow
 	mainWnd := MainWindow{
-		Title:   "输入几个中文吧。",
+		Title:   "三炮十五兵 Go语言版",
 		MinSize: Size{Width: 600, Height: 400},
 		Bounds: Rectangle{
 			X:      (int(screenWidth) - wndWidth) / 2,
@@ -26,6 +26,7 @@ func main() {
 			Width:  wndWidth,
 			Height: wndHeight,
 		},
+		Font:   Font{Family: "宋体", PointSize: 20},
 		Layout: VBox{},
 		Children: []Widget{
 			HSplitter{
