@@ -5,6 +5,8 @@ import (
 	"github.com/lxn/walk"
 	. "github.com/lxn/walk/declarative"
 	"github.com/lxn/win"
+	"image/png"
+	"os"
 	"strings"
 	"time"
 )
@@ -60,6 +62,13 @@ func main() {
 		fmt.Println(mainWndP.Bounds())
 		mainWnd.Bounds.X = 300
 		fmt.Println(mainWndP.Bounds())
+	}()
+	pngFile, _ := os.Open("block.png")
+	img, _ := png.Decode(pngFile)
+	icon, _ := walk.NewIconFromImage(img)
+	go func() {
+		time.Sleep(100 * time.Millisecond)
+		_ = mainWndP.SetIcon(icon)
 	}()
 	_, _ = mainWnd.Run()
 }
