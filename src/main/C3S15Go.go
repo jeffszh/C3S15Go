@@ -1,18 +1,38 @@
 package main
 
 import (
+	"embed"
 	"fmt"
 	"github.com/lxn/walk"
 	. "github.com/lxn/walk/declarative"
 	"github.com/lxn/win"
 	"image/png"
-	"os"
 	"strings"
 	"time"
 )
 
+//go:embed images
+var imgs embed.FS
+
+//go:embed abc.txt
+var abc string
+
+//go:embed txt_files
+var txtFiles embed.FS
+
 func main() {
 	var inTE, outTE *walk.TextEdit
+
+	fmt.Println(abc)
+	fileContent, _ := txtFiles.ReadFile("txt_files/app_def.txt")
+	fmt.Println(len(fileContent))
+	fmt.Println(fileContent)
+	appDefTxt, _ := txtFiles.Open("txt_files/app_def.txt")
+	buffer := make([]byte, 2048)
+	recLen, _ := appDefTxt.Read(buffer)
+	fmt.Println(recLen)
+	fmt.Println(len(buffer))
+	_ = appDefTxt.Close()
 
 	screenWidth := win.GetSystemMetrics(win.SM_CXSCREEN)
 	screenHeight := win.GetSystemMetrics(win.SM_CYSCREEN)
@@ -63,9 +83,9 @@ func main() {
 		mainWnd.Bounds.X = 300
 		fmt.Println(mainWndP.Bounds())
 	}()
-	pngFile, _ := os.Open("block.png")
+	pngFile, _ := imgs.Open("images/block.png")
 	img, _ := png.Decode(pngFile)
-	icon, _ := walk.NewIconFromImage(img)
+	icon, _ := walk.NewIconFromImageForDPI(img, 300)
 	go func() {
 		time.Sleep(100 * time.Millisecond)
 		_ = mainWndP.SetIcon(icon)
