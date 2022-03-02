@@ -6,6 +6,7 @@ import (
 	"github.com/lxn/walk"
 	. "github.com/lxn/walk/declarative"
 	"github.com/lxn/win"
+	"image/jpeg"
 	"image/png"
 	"time"
 )
@@ -14,19 +15,22 @@ import (
 var imgs embed.FS
 
 type mainWndStuff struct {
-	mainWnd    *walk.MainWindow
-	chessBoard *walk.CustomWidget
+	mainWnd              *walk.MainWindow
+	chessBoard           *walk.CustomWidget
+	chessBoardBackground *walk.Bitmap
 }
 
 func main() {
-	//bkFile, _ := imgs.Open("images/wood.jpg")
-	//bkImg, _ := jpeg.Decode(bkFile)
+	bkFile, _ := imgs.Open("images/wood.jpg")
+	bkImg, _ := jpeg.Decode(bkFile)
+	bkBmp, _ := walk.NewBitmapFromImageForDPI(bkImg, 96)
 
 	screenWidth := win.GetSystemMetrics(win.SM_CXSCREEN)
 	screenHeight := win.GetSystemMetrics(win.SM_CYSCREEN)
 	wndWidth := 800
 	wndHeight := 600
 	mws := new(mainWndStuff)
+	mws.chessBoardBackground = bkBmp
 	mainWnd := MainWindow{
 		Title:   "三炮十五兵 Go语言版",
 		MinSize: Size{Width: 600, Height: 400},
@@ -50,26 +54,17 @@ func main() {
 				},
 			},
 			CustomWidget{
-				//Background: BitmapBrush{
-				//	Image: bkImg,
-				//},
-				//AssignTo: &mws.chessBoard,
+				AssignTo:            &mws.chessBoard,
+				ClearsBackground:    false,
+				InvalidatesOnResize: true,
+				Paint:               mws.chessBoardOnPaint,
 			},
-			//HSplitter{
-			//	Children: []Widget{
-			//		TextEdit{AssignTo: &inTE},
-			//		TextEdit{AssignTo: &outTE, ReadOnly: true},
-			//	},
-			//},
 			Composite{
 				Layout: HBox{},
 				Children: []Widget{
 					HSpacer{},
 					PushButton{
 						Text: "SCREAM",
-						//OnClicked: func() {
-						//	_ = outTE.SetText(strings.ToUpper(inTE.Text()))
-						//},
 					},
 					HSpacer{},
 				},
