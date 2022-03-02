@@ -14,25 +14,8 @@ import (
 //go:embed images
 var imgs embed.FS
 
-//go:embed abc.txt
-var abc string
-
-//go:embed txt_files
-var txtFiles embed.FS
-
 func main() {
 	var inTE, outTE *walk.TextEdit
-
-	fmt.Println(abc)
-	fileContent, _ := txtFiles.ReadFile("txt_files/app_def.txt")
-	fmt.Println(len(fileContent))
-	fmt.Println(fileContent)
-	appDefTxt, _ := txtFiles.Open("txt_files/app_def.txt")
-	buffer := make([]byte, 2048)
-	recLen, _ := appDefTxt.Read(buffer)
-	fmt.Println(recLen)
-	fmt.Println(len(buffer))
-	_ = appDefTxt.Close()
 
 	screenWidth := win.GetSystemMetrics(win.SM_CXSCREEN)
 	screenHeight := win.GetSystemMetrics(win.SM_CYSCREEN)
