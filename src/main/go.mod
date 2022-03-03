@@ -3,6 +3,7 @@ module main
 go 1.17
 
 require (
+	fyne.io/fyne v1.4.3 // indirect
 	fyne.io/fyne/v2 v2.1.3 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/fredbi/uri v0.0.0-20181227131451-3dcfdacbaaf3 // indirect
