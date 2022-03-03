@@ -20,9 +20,10 @@ type mainWndStuff struct {
 	chessBoardBackground *walk.Bitmap
 }
 
+//os.Setenv("FYNE_FONT", "C:\\Windows\\Fonts\\SIMYOU.TTF")
+
 func main() {
-	bkFile, _ := imgs.Open("images/wood.jpg")
-	bkImg, _ := jpeg.Decode(bkFile)
+	bkImg, _ := jpeg.Decode(noErr(imgs.Open("images/wood.jpg")))
 	bkBmp, _ := walk.NewBitmapFromImageForDPI(bkImg, 96)
 
 	screenWidth := win.GetSystemMetrics(win.SM_CXSCREEN)
