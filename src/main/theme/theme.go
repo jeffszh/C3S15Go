@@ -1,4 +1,4 @@
-// theme.go
+// Package theme theme.go
 package theme
 
 import (
@@ -10,13 +10,14 @@ import (
 
 type MyTheme struct{}
 
-var CurrentTheme fyne.Theme = &MyTheme{}
+var AppTheme fyne.Theme = &MyTheme{}
 
-// return bundled font resource
+// Font return bundled font resource
 // ResourceSourceHanSansTtf 即是 bundle.go 文件中 var 的变量名
-func (m MyTheme) Font(s fyne.TextStyle) fyne.Resource {
+func (m MyTheme) Font(fyne.TextStyle) fyne.Resource {
 	return resourceSimsunTtc
 }
+
 func (*MyTheme) Color(n fyne.ThemeColorName, v fyne.ThemeVariant) color.Color {
 	return theme.DefaultTheme().Color(n, v)
 }
@@ -25,7 +26,13 @@ func (*MyTheme) Icon(n fyne.ThemeIconName) fyne.Resource {
 	return theme.DefaultTheme().Icon(n)
 }
 
-func (*MyTheme) Size(n fyne.ThemeSizeName) float32 {
-	return theme.DefaultTheme().Size(n)
-	//return 20
+func (*MyTheme) Size(name fyne.ThemeSizeName) float32 {
+	//return theme.DefaultTheme().Size(n)
+	//println(n, theme.DefaultTheme().Size(n))
+	switch name {
+	case "text":
+		return 20
+	default:
+		return theme.DefaultTheme().Size(name)
+	}
 }
