@@ -10,7 +10,7 @@ import (
 
 type MyTheme struct{}
 
-var CurrentTheme fyne.Theme = (*MyTheme)(nil)
+var CurrentTheme fyne.Theme = &MyTheme{}
 
 // return bundled font resource
 // ResourceSourceHanSansTtf 即是 bundle.go 文件中 var 的变量名
@@ -27,4 +27,5 @@ func (*MyTheme) Icon(n fyne.ThemeIconName) fyne.Resource {
 
 func (*MyTheme) Size(n fyne.ThemeSizeName) float32 {
 	return theme.DefaultTheme().Size(n)
+	//return 20
 }

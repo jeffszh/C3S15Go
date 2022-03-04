@@ -16,6 +16,7 @@ func main() {
 	//os.Setenv("FYNE_FONT", "C:\\Windows\\Fonts\\SIMYOU.TTF")
 	fmt.Println(theme.CurrentTheme)
 	a := app.New()
+	a.Settings().SetTheme(theme.CurrentTheme)
 	w := a.NewWindow("Hello 中文 World")
 
 	w.SetContent(widget.NewLabel("Hello World! 这是汉字。"))
