@@ -5,6 +5,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
 	"main/theme"
@@ -21,6 +22,7 @@ func main() {
 	bottomPane := container.New(layout.NewHBoxLayout(),
 		layout.NewSpacer(), statusText, layout.NewSpacer())
 	btnRestart := widget.NewButton("重新开始", func() {
+		dialog.NewInformation("提示消息", "马上重新开始。", mainWnd).Show()
 		fmt.Println("按钮：重新开始")
 		statusText.SetText("重新开始")
 		go func() {
@@ -33,14 +35,9 @@ func main() {
 	layout.NewBorderLayout(nil, nil, nil, nil)
 	mainWnd.SetContent(container.New(layout.NewBorderLayout(
 		topPane, bottomPane, nil, nil),
-		topPane, bottomPane))
+		topPane, bottomPane, NewChessBoard()))
+	mainWnd.Resize(fyne.NewSize(800, 600))
 	// 无法指定窗口位置，但是却有居中，真奇葩。
 	mainWnd.CenterOnScreen()
-	mainWnd.Resize(fyne.NewSize(1200, 900))
-	go func() {
-		// 通过对中和改变尺寸，实际上可以把窗口移到任意位置，有必要的时候就用这招吧。
-		time.Sleep(100 * time.Millisecond)
-		mainWnd.Resize(fyne.NewSize(800, 600))
-	}()
 	mainWnd.ShowAndRun()
 }
