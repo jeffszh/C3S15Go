@@ -71,7 +71,7 @@ func (cb *chessBoard) sizeChanged(size fyne.Size) {
 
 	// 存入到chessBoard中。
 	cb.cellSize = cellSize
-	cb.orgY = startX
+	cb.orgX = startX
 	cb.orgY = startY
 
 	// 背景
