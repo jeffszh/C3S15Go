@@ -13,6 +13,8 @@ const (
 	outerCircleRatio = 0.8
 	innerCircleRatio = 0.72
 	textSizeRatio    = 0.44
+
+	chessBoardMinWidth = 200.0
 )
 
 var backgroundPictureResource = &fyne.StaticResource{
@@ -87,6 +89,11 @@ func (cbr *chessBoardRenderer) Layout(size fyne.Size) {
 }
 
 func (cb *chessBoard) sizeChanged(size fyne.Size) {
+	// 防止出錯。
+	if size.Width < chessBoardMinWidth || size.Height < chessBoardMinWidth {
+		return
+	}
+
 	// 计算尺寸
 	borderWidth := float32(20)
 	cellSize := float32(int((fyne.Min(size.Width, size.Height) - 2*borderWidth) / 5))
@@ -145,7 +152,7 @@ func (cb *chessBoard) Resize(size fyne.Size) {
 }
 
 func (cbr *chessBoardRenderer) MinSize() fyne.Size {
-	return fyne.NewSize(80, 60)
+	return fyne.NewSize(200, 150)
 }
 
 func (cbr *chessBoardRenderer) Objects() []fyne.CanvasObject {
