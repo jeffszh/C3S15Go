@@ -9,6 +9,12 @@ import (
 	"main/resource"
 )
 
+const (
+	outerCircleRatio = 0.8
+	innerCircleRatio = 0.72
+	textSizeRatio    = 0.44
+)
+
 var backgroundPictureResource = &fyne.StaticResource{
 	StaticName:    "background",
 	StaticContent: resource.LoadFileInBytes("images/wood.jpg"),
@@ -21,12 +27,20 @@ type chessBoard struct {
 	hLines [6]fyne.CanvasObject
 	vLines [6]fyne.CanvasObject
 
+	chessCells [25]*chessCell
+
 	cellSize   float32
 	orgX, orgY float32
 }
 
 type chessBoardRenderer struct {
 	chessBoard *chessBoard
+}
+
+type chessCell struct {
+	outerCircle *canvas.Circle
+	innerCircle *canvas.Circle
+	text        *canvas.Text
 }
 
 func NewChessBoard() *chessBoard {
@@ -45,6 +59,16 @@ func NewChessBoard() *chessBoard {
 		}
 		cb.hLines[i] = hLine
 		cb.vLines[i] = vLine
+	}
+	for i := range cb.chessCells {
+		cell := chessCell{
+			canvas.NewCircle(color.Black),
+			canvas.NewCircle(color.RGBA{R: 255, G: 255, B: 0, A: 255}),
+			canvas.NewText("炮", color.Black),
+		}
+		//cell.text.Text = "兵"
+		cell.text.Alignment = fyne.TextAlignCenter
+		cb.chessCells[i] = &cell
 	}
 	return &cb
 }
@@ -89,6 +113,29 @@ func (cb *chessBoard) sizeChanged(size fyne.Size) {
 		vLine.Resize(fyne.NewSize(0, cellSize*5))
 		vLine.Move(fyne.NewPos(startX+cellSize*float32(i), startY))
 	}
+
+	// 棋子
+	for i := range cb.chessCells {
+		x := i % 5
+		y := i / 5
+		cell := cb.chessCells[i]
+		outerCircle := cell.outerCircle
+		innerCircle := cell.innerCircle
+		outerCircle.Resize(fyne.NewSize(cellSize*outerCircleRatio, cellSize*outerCircleRatio))
+		innerCircle.Resize(fyne.NewSize(cellSize*innerCircleRatio, cellSize*innerCircleRatio))
+		outerCircle.Move(fyne.NewPos(
+			startX+float32(x)*cellSize+cellSize*(1-outerCircleRatio)/2,
+			startY+float32(y)*cellSize+cellSize*(1-outerCircleRatio)/2,
+		))
+		innerCircle.Move(fyne.NewPos(
+			startX+float32(x)*cellSize+cellSize*(1-innerCircleRatio)/2,
+			startY+float32(y)*cellSize+cellSize*(1-innerCircleRatio)/2,
+		))
+		text := cell.text
+		text.TextSize = cellSize * textSizeRatio
+		text.Resize(fyne.NewSize(cellSize, cellSize))
+		text.Move(fyne.NewPos(startX+float32(x)*cellSize, startY+float32(y)*cellSize))
+	}
 }
 
 func (cb *chessBoard) Resize(size fyne.Size) {
@@ -112,6 +159,11 @@ func (cbr *chessBoardRenderer) Objects() []fyne.CanvasObject {
 	//	objs = append(objs, cbr.chessBoard.hLines[i])
 	//}
 	objs = append(objs, cbr.chessBoard.vLines[:]...)
+	for i := range cbr.chessBoard.chessCells {
+		objs = append(objs, cbr.chessBoard.chessCells[i].outerCircle)
+		objs = append(objs, cbr.chessBoard.chessCells[i].innerCircle)
+		objs = append(objs, cbr.chessBoard.chessCells[i].text)
+	}
 	return objs
 }
 
