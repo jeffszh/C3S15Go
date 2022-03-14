@@ -6,7 +6,6 @@ import (
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
-	"main/model"
 	"main/theme"
 )
 
@@ -44,5 +43,5 @@ func main() {
 }
 
 func restartGame() {
-	model.InitScene(mainChessBoard.scene)
+	mainChessBoard.scene.SetInitialContent()
 }
