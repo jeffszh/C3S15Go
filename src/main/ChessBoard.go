@@ -6,13 +6,13 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/widget"
 	"image/color"
+	"main/model"
 	"main/resource"
 )
 
 const (
-	outerCircleRatio = 0.8
-	innerCircleRatio = 0.72
-	textSizeRatio    = 0.44
+	chessDiameterRatio = 0.8
+	chessTextSizeRatio = 0.44
 
 	chessBoardMinWidth = 200.0
 )
@@ -33,6 +33,8 @@ type chessBoard struct {
 
 	cellSize   float32
 	orgX, orgY float32
+
+	scene model.Scene
 }
 
 type chessBoardRenderer struct {
@@ -40,9 +42,8 @@ type chessBoardRenderer struct {
 }
 
 type chessCell struct {
-	outerCircle *canvas.Circle
-	innerCircle *canvas.Circle
-	text        *canvas.Text
+	circle *canvas.Circle
+	text   *canvas.Text
 }
 
 func NewChessBoard() *chessBoard {
@@ -64,14 +65,17 @@ func NewChessBoard() *chessBoard {
 	}
 	for i := range cb.chessCells {
 		cell := chessCell{
-			canvas.NewCircle(color.Black),
-			canvas.NewCircle(color.RGBA{R: 255, G: 255, B: 0, A: 255}),
+			canvas.NewCircle(color.RGBA{R: 255, G: 255, B: 255, A: 255}),
 			canvas.NewText("炮", color.Black),
 		}
+		cell.circle.StrokeWidth = 3
+		cell.circle.StrokeColor = color.Black
 		//cell.text.Text = "兵"
 		cell.text.Alignment = fyne.TextAlignCenter
 		cb.chessCells[i] = &cell
 	}
+	cb.scene = model.NewScene()
+	cb.scene.SetOnChange(cb.applyScene)
 	return &cb
 }
 
@@ -113,10 +117,10 @@ func (cb *chessBoard) sizeChanged(size fyne.Size) {
 
 	// 横竖线
 	for i := range cb.hLines {
-		hLine := cb.hLines[i]
+		hLine := cb.hLines[i].(*canvas.Line)	// 可以用类型断言
 		hLine.Resize(fyne.NewSize(cellSize*5, 0))
 		hLine.Move(fyne.NewPos(startX, startY+cellSize*float32(i)))
-		vLine := cb.vLines[i]
+		vLine := cb.vLines[i].(*canvas.Line)
 		vLine.Resize(fyne.NewSize(0, cellSize*5))
 		vLine.Move(fyne.NewPos(startX+cellSize*float32(i), startY))
 	}
@@ -126,20 +130,13 @@ func (cb *chessBoard) sizeChanged(size fyne.Size) {
 		x := i % 5
 		y := i / 5
 		cell := cb.chessCells[i]
-		outerCircle := cell.outerCircle
-		innerCircle := cell.innerCircle
-		outerCircle.Resize(fyne.NewSize(cellSize*outerCircleRatio, cellSize*outerCircleRatio))
-		innerCircle.Resize(fyne.NewSize(cellSize*innerCircleRatio, cellSize*innerCircleRatio))
-		outerCircle.Move(fyne.NewPos(
-			startX+float32(x)*cellSize+cellSize*(1-outerCircleRatio)/2,
-			startY+float32(y)*cellSize+cellSize*(1-outerCircleRatio)/2,
-		))
-		innerCircle.Move(fyne.NewPos(
-			startX+float32(x)*cellSize+cellSize*(1-innerCircleRatio)/2,
-			startY+float32(y)*cellSize+cellSize*(1-innerCircleRatio)/2,
+		cell.circle.Resize(fyne.NewSize(cellSize*chessDiameterRatio, cellSize*chessDiameterRatio))
+		cell.circle.Move(fyne.NewPos(
+			startX+float32(x)*cellSize+cellSize*(1-chessDiameterRatio)/2,
+			startY+float32(y)*cellSize+cellSize*(1-chessDiameterRatio)/2,
 		))
 		text := cell.text
-		text.TextSize = cellSize * textSizeRatio
+		text.TextSize = cellSize * chessTextSizeRatio
 		text.Resize(fyne.NewSize(cellSize, cellSize))
 		text.Move(fyne.NewPos(startX+float32(x)*cellSize, startY+float32(y)*cellSize))
 	}
@@ -149,6 +146,21 @@ func (cb *chessBoard) Resize(size fyne.Size) {
 	//fmt.Printf("resize: %f, %f\n", size.Width, size.Height)
 	cb.sizeChanged(size)
 	cb.BaseWidget.Resize(size)
+}
+
+func (cb *chessBoard) applyScene(scene model.Scene) {
+	for i := range scene.ChessList() {
+		ch := scene.ChessList()[i]
+		chc := (cb.chessCells)[i]
+		chc.text.Text = ch.Text()
+		chc.text.Color = ch.Color()
+		chc.text.Refresh()
+		chc.text.Hidden = !ch.Visible()
+		chc.circle.StrokeColor = ch.Color()
+		chc.circle.Refresh()
+		chc.circle.Hidden = !ch.Visible()
+	}
+	//cb.Refresh()
 }
 
 func (cbr *chessBoardRenderer) MinSize() fyne.Size {
@@ -167,8 +179,7 @@ func (cbr *chessBoardRenderer) Objects() []fyne.CanvasObject {
 	//}
 	objs = append(objs, cbr.chessBoard.vLines[:]...)
 	for i := range cbr.chessBoard.chessCells {
-		objs = append(objs, cbr.chessBoard.chessCells[i].outerCircle)
-		objs = append(objs, cbr.chessBoard.chessCells[i].innerCircle)
+		objs = append(objs, cbr.chessBoard.chessCells[i].circle)
 		objs = append(objs, cbr.chessBoard.chessCells[i].text)
 	}
 	return objs
@@ -178,6 +189,7 @@ func (cbr *chessBoardRenderer) Refresh() {
 	fmt.Println("刷新。")
 	//cbr.chessBoard.Refresh()
 	//cbr.chessBoard.background.Refresh()
+	//widget.BaseWidget.Refresh(cbr)
 }
 
 func (cb *chessBoard) Tapped(e *fyne.PointEvent) {
