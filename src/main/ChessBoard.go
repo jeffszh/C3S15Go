@@ -117,10 +117,10 @@ func (cb *chessBoard) sizeChanged(size fyne.Size) {
 
 	// 横竖线
 	for i := range cb.hLines {
-		hLine := cb.hLines[i]
+		hLine := cb.hLines[i].(*canvas.Line)	// 可以用类型断言
 		hLine.Resize(fyne.NewSize(cellSize*5, 0))
 		hLine.Move(fyne.NewPos(startX, startY+cellSize*float32(i)))
-		vLine := cb.vLines[i]
+		vLine := cb.vLines[i].(*canvas.Line)
 		vLine.Resize(fyne.NewSize(0, cellSize*5))
 		vLine.Move(fyne.NewPos(startX+cellSize*float32(i), startY))
 	}
