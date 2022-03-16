@@ -76,8 +76,8 @@ func NewChessBoard() *chessBoard {
 		cb.chessCells[i] = &cell
 	}
 	cb.lastMoveIndicator = NewLastMoveIndicator()
-	cb.lastMoveIndicator.GetImage().Resize(fyne.NewSize(120, 120))
-	cb.lastMoveIndicator.GetImage().Move(fyne.NewPos(30, 30))
+	cb.lastMoveIndicator.Image().Resize(fyne.NewSize(120, 120))
+	cb.lastMoveIndicator.Image().Move(fyne.NewPos(30, 30))
 	cb.scene = model.NewScene()
 	cb.scene.SetOnChange(cb.applyScene)
 	return &cb
@@ -144,6 +144,8 @@ func (cb *chessBoard) sizeChanged(size fyne.Size) {
 		text.Resize(fyne.NewSize(cellSize, cellSize))
 		text.Move(fyne.NewPos(startX+float32(x)*cellSize, startY+float32(y)*cellSize))
 	}
+
+	repositionMoveIndicator(cb.lastMoveIndicator, cb)
 }
 
 func (cb *chessBoard) Resize(size fyne.Size) {
@@ -165,6 +167,7 @@ func (cb *chessBoard) applyScene(scene model.Scene) {
 		chc.circle.Hidden = !ch.Visible()
 	}
 	//cb.Refresh()
+	repositionMoveIndicator(cb.lastMoveIndicator, cb)
 }
 
 func (cbr *chessBoardRenderer) MinSize() fyne.Size {
@@ -186,7 +189,7 @@ func (cbr *chessBoardRenderer) Objects() []fyne.CanvasObject {
 		objs = append(objs, cbr.chessBoard.chessCells[i].circle)
 		objs = append(objs, cbr.chessBoard.chessCells[i].text)
 	}
-	objs = append(objs, cbr.chessBoard.lastMoveIndicator.GetImage())
+	objs = append(objs, cbr.chessBoard.lastMoveIndicator.Image())
 	return objs
 }
 
