@@ -29,7 +29,8 @@ type chessBoard struct {
 	hLines [6]fyne.CanvasObject
 	vLines [6]fyne.CanvasObject
 
-	chessCells [25]*chessCell
+	chessCells        [25]*chessCell
+	lastMoveIndicator LastMoveIndicator
 
 	cellSize   float32
 	orgX, orgY float32
@@ -74,6 +75,9 @@ func NewChessBoard() *chessBoard {
 		cell.text.Alignment = fyne.TextAlignCenter
 		cb.chessCells[i] = &cell
 	}
+	cb.lastMoveIndicator = NewLastMoveIndicator()
+	cb.lastMoveIndicator.GetImage().Resize(fyne.NewSize(120, 120))
+	cb.lastMoveIndicator.GetImage().Move(fyne.NewPos(30, 30))
 	cb.scene = model.NewScene()
 	cb.scene.SetOnChange(cb.applyScene)
 	return &cb
@@ -117,7 +121,7 @@ func (cb *chessBoard) sizeChanged(size fyne.Size) {
 
 	// 横竖线
 	for i := range cb.hLines {
-		hLine := cb.hLines[i].(*canvas.Line)	// 可以用类型断言
+		hLine := cb.hLines[i].(*canvas.Line) // 可以用类型断言
 		hLine.Resize(fyne.NewSize(cellSize*5, 0))
 		hLine.Move(fyne.NewPos(startX, startY+cellSize*float32(i)))
 		vLine := cb.vLines[i].(*canvas.Line)
@@ -182,6 +186,7 @@ func (cbr *chessBoardRenderer) Objects() []fyne.CanvasObject {
 		objs = append(objs, cbr.chessBoard.chessCells[i].circle)
 		objs = append(objs, cbr.chessBoard.chessCells[i].text)
 	}
+	objs = append(objs, cbr.chessBoard.lastMoveIndicator.GetImage())
 	return objs
 }
 
