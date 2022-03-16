@@ -205,8 +205,9 @@ func (cb *chessBoard) Tapped(e *fyne.PointEvent) {
 }
 
 func (cb *chessBoard) Dragged(event *fyne.DragEvent) {
-	println("拖动！")
-	println(event)
+	x, y := event.Position.Components()
+	dx, dy := event.Dragged.Components()
+	fmt.Printf("拖动！%f,%f --> %f,%f\n", x, y, dx, dy)
 }
 
 func (cb *chessBoard) DragEnd() {
