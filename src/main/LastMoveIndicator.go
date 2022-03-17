@@ -126,8 +126,10 @@ func repositionMoveIndicator(lmi LastMoveIndicator, board *chessBoard) {
 	}
 	lmi.Image().Resize(fyne.NewSize(board.cellSize*xScale, board.cellSize*yScale))
 
-	startX := (board.Size().Width - board.cellSize*5) / 2
-	startY := (board.Size().Height - board.cellSize*5) / 2
+	//startX := (board.Size().Width - board.cellSize*5) / 2
+	//startY := (board.Size().Height - board.cellSize*5) / 2
+	startX := board.orgX
+	startY := board.orgY
 	if fromX != toX {
 		startX += board.cellSize / 2
 	}
