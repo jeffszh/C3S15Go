@@ -41,6 +41,9 @@ type chessBoard struct {
 	draggingStarted    bool
 	startDragCellIndex int
 	draggingCell       *chessCell
+
+	// 通知外面
+	onGameInfoChanged func()
 }
 
 type chessBoardRenderer struct {
@@ -97,6 +100,9 @@ func NewChessBoard() *chessBoard {
 	cb.draggingCell.circle.Hide()
 	cb.draggingCell.text.Hide()
 
+	//cb.onGameInfoChanged = func() {
+	//	// do nothing
+	//}
 	cb.scene = model.NewScene()
 	cb.scene.SetOnChange(cb.applyScene)
 	return &cb
@@ -187,6 +193,7 @@ func (cb *chessBoard) applyScene(scene model.Scene) {
 	}
 	//cb.Refresh()
 	repositionMoveIndicator(cb.lastMoveIndicator, cb)
+	cb.onGameInfoChanged()
 }
 
 func (cbr *chessBoardRenderer) MinSize() fyne.Size {

@@ -57,7 +57,7 @@ type LastMoveIndicator interface {
 }
 
 func NewLastMoveIndicator() LastMoveIndicator {
-	println("==========================================")
+	//println("==========================================")
 	lmi := &lastMoveIndicator{
 		image: leftArrow,
 	}
