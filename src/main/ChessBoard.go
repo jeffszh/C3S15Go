@@ -41,6 +41,9 @@ type chessBoard struct {
 	draggingStarted    bool
 	startDragCellIndex int
 	draggingCell       *chessCell
+
+	// 通知外面
+	onGameInfoChanged func()
 }
 
 type chessBoardRenderer struct {
@@ -97,6 +100,9 @@ func NewChessBoard() *chessBoard {
 	cb.draggingCell.circle.Hide()
 	cb.draggingCell.text.Hide()
 
+	//cb.onGameInfoChanged = func() {
+	//	// do nothing
+	//}
 	cb.scene = model.NewScene()
 	cb.scene.SetOnChange(cb.applyScene)
 	return &cb
@@ -187,6 +193,7 @@ func (cb *chessBoard) applyScene(scene model.Scene) {
 	}
 	//cb.Refresh()
 	repositionMoveIndicator(cb.lastMoveIndicator, cb)
+	cb.onGameInfoChanged()
 }
 
 func (cbr *chessBoardRenderer) MinSize() fyne.Size {
@@ -279,9 +286,21 @@ func (cb *chessBoard) DragEnd() {
 		cb.draggingCell.text.Hide()
 		cb.draggingCell.circle.Hide()
 	}
+
+	// 走棋
+	if cb.startDragCellIndex >= 0 {
+		mx, my := cb.draggingCell.circle.Position().Components()
+		sx, sy := cb.draggingCell.circle.Size().Components()
+		mouseX := mx + sx/2
+		mouseY := my + sy/2
+		toX, toY := cb.mouseXyToCellXy(mouseX, mouseY)
+		fromX, fromY := model.IndexToXY(cb.startDragCellIndex)
+		move := model.NewMoveByXY(fromX, fromY, toX, toY)
+		cb.scene.ApplyMove(move)
+	}
+
 	cb.startDragCellIndex = -1
 	cb.draggingStarted = false
-	// todo: 走棋
 }
 
 func (cb *chessBoard) mouseXyToCellXy(mouseX, mouseY float32) (cellX, cellY int) {

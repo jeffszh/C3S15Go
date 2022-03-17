@@ -1,23 +1,26 @@
 package main
 
 import (
+	"fmt"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
+	"main/model"
 	"main/theme"
 )
 
 var mainChessBoard = NewChessBoard()
+var statusText *widget.Label
 
 func main() {
 	//os.Setenv("FYNE_FONT", "C:\\Windows\\Fonts\\SIMYOU.TTF")
 	appMain := app.New()
 	appMain.Settings().SetTheme(theme.AppTheme)
-	mainWnd := appMain.NewWindow("三炮十五兵 Go语言版")
+	mainWnd := appMain.NewWindow(model.AppConfig.AppTitle)
 
-	statusText := widget.NewLabel("就绪")
+	statusText = widget.NewLabel("就绪")
 	bottomPane := container.New(layout.NewHBoxLayout(),
 		layout.NewSpacer(), statusText, layout.NewSpacer())
 	btnRestart := widget.NewButton("重新开始", func() {
@@ -36,12 +39,26 @@ func main() {
 	mainWnd.SetContent(container.New(layout.NewBorderLayout(
 		topPane, bottomPane, nil, nil),
 		topPane, bottomPane, mainChessBoard))
+	mainChessBoard.onGameInfoChanged = updateStatusText
 	mainWnd.Resize(fyne.NewSize(800, 600))
 	// 无法指定窗口位置，但是却有居中，真奇葩。
 	mainWnd.CenterOnScreen()
+	restartGame()
 	mainWnd.ShowAndRun()
 }
 
 func restartGame() {
 	mainChessBoard.scene.SetInitialContent()
+}
+
+func updateStatusText() {
+	conf := model.AppConfig
+	mainScene := mainChessBoard.scene
+	statusText.Text = fmt.Sprintf(
+		"%s：%s  %s：%s    步数：%d  轮到【%s】走棋",
+		conf.SoldierText, model.PlayerTypeText(conf.SoldierPlayType),
+		conf.CannonText, model.PlayerTypeText(conf.SoldierPlayType),
+		mainScene.MoveCount(), model.NewChess(mainScene.MovingSide()).Text(),
+	)
+	statusText.Refresh()
 }
