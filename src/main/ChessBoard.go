@@ -29,12 +29,18 @@ type chessBoard struct {
 	hLines [6]fyne.CanvasObject
 	vLines [6]fyne.CanvasObject
 
-	chessCells [25]*chessCell
+	chessCells        [25]*chessCell
+	lastMoveIndicator LastMoveIndicator
 
 	cellSize   float32
 	orgX, orgY float32
 
 	scene model.Scene
+
+	// 拖放操作
+	draggingStarted    bool
+	startDragCellIndex int
+	draggingCell       *chessCell
 }
 
 type chessBoardRenderer struct {
@@ -74,6 +80,23 @@ func NewChessBoard() *chessBoard {
 		cell.text.Alignment = fyne.TextAlignCenter
 		cb.chessCells[i] = &cell
 	}
+	cb.lastMoveIndicator = NewLastMoveIndicator()
+	cb.lastMoveIndicator.Image().Resize(fyne.NewSize(120, 120))
+	cb.lastMoveIndicator.Image().Move(fyne.NewPos(30, 30))
+
+	// 初始化用于拖放的cell。
+	cb.draggingStarted = false
+	cb.startDragCellIndex = -1
+	cb.draggingCell = &chessCell{
+		canvas.NewCircle(color.RGBA{R: 255, G: 255, B: 255, A: 255}),
+		canvas.NewText("炮", color.Black),
+	}
+	cb.draggingCell.circle.StrokeWidth = 3
+	cb.draggingCell.circle.StrokeColor = color.Black
+	cb.draggingCell.text.Alignment = fyne.TextAlignCenter
+	cb.draggingCell.circle.Hide()
+	cb.draggingCell.text.Hide()
+
 	cb.scene = model.NewScene()
 	cb.scene.SetOnChange(cb.applyScene)
 	return &cb
@@ -117,7 +140,7 @@ func (cb *chessBoard) sizeChanged(size fyne.Size) {
 
 	// 横竖线
 	for i := range cb.hLines {
-		hLine := cb.hLines[i].(*canvas.Line)	// 可以用类型断言
+		hLine := cb.hLines[i].(*canvas.Line) // 可以用类型断言
 		hLine.Resize(fyne.NewSize(cellSize*5, 0))
 		hLine.Move(fyne.NewPos(startX, startY+cellSize*float32(i)))
 		vLine := cb.vLines[i].(*canvas.Line)
@@ -140,6 +163,8 @@ func (cb *chessBoard) sizeChanged(size fyne.Size) {
 		text.Resize(fyne.NewSize(cellSize, cellSize))
 		text.Move(fyne.NewPos(startX+float32(x)*cellSize, startY+float32(y)*cellSize))
 	}
+
+	repositionMoveIndicator(cb.lastMoveIndicator, cb)
 }
 
 func (cb *chessBoard) Resize(size fyne.Size) {
@@ -161,6 +186,7 @@ func (cb *chessBoard) applyScene(scene model.Scene) {
 		chc.circle.Hidden = !ch.Visible()
 	}
 	//cb.Refresh()
+	repositionMoveIndicator(cb.lastMoveIndicator, cb)
 }
 
 func (cbr *chessBoardRenderer) MinSize() fyne.Size {
@@ -182,6 +208,9 @@ func (cbr *chessBoardRenderer) Objects() []fyne.CanvasObject {
 		objs = append(objs, cbr.chessBoard.chessCells[i].circle)
 		objs = append(objs, cbr.chessBoard.chessCells[i].text)
 	}
+	objs = append(objs, cbr.chessBoard.lastMoveIndicator.Image())
+	objs = append(objs, cbr.chessBoard.draggingCell.circle)
+	objs = append(objs, cbr.chessBoard.draggingCell.text)
 	return objs
 }
 
@@ -197,10 +226,66 @@ func (cb *chessBoard) Tapped(e *fyne.PointEvent) {
 }
 
 func (cb *chessBoard) Dragged(event *fyne.DragEvent) {
-	println("拖动！")
-	println(event)
+	mouseX, mouseY := event.Position.Components()
+	dx, dy := event.Dragged.Components()
+	cellX, cellY := cb.mouseXyToCellXy(mouseX, mouseY)
+	fmt.Printf("拖动！%f,%f --> %f,%f | %d,%d\n", mouseX, mouseY, dx, dy, cellX, cellY)
+
+	if !cb.draggingStarted {
+		// 如果之前未drag，现在开始drag，不管位置是否合法，总要设置已开始drag的标志。
+		cb.draggingStarted = true
+		if 0 <= cellX && cellX < 5 &&
+			0 <= cellY && cellY < 5 {
+			cellInd := model.XyToIndex(cellX, cellY)
+			if cb.scene.ChessList()[cellInd].Type() == cb.scene.MovingSide() {
+				// 记下开始拖动的位置
+				cb.startDragCellIndex = cellInd
+				// 原先位置上的cell隐藏掉
+				cb.chessCells[cellInd].text.Hide()
+				cb.chessCells[cellInd].circle.Hide()
+				// 正在拖动的cell改成跟原先位置上的一模一样
+				cb.draggingCell.text.Text = cb.chessCells[cellInd].text.Text
+				cb.draggingCell.text.TextSize = cb.chessCells[cellInd].text.TextSize
+				cb.draggingCell.text.Color = cb.chessCells[cellInd].text.Color
+				cb.draggingCell.text.Resize(cb.chessCells[cellInd].text.Size())
+				cb.draggingCell.circle.StrokeColor = cb.chessCells[cellInd].circle.StrokeColor
+				cb.draggingCell.circle.Resize(cb.chessCells[cellInd].circle.Size())
+				cb.draggingCell.text.Show()
+				cb.draggingCell.circle.Show()
+			}
+		}
+	}
+
+	// 如果已经有合法的drag，更新位置。
+	if cb.startDragCellIndex >= 0 {
+		cb.draggingCell.circle.Move(fyne.NewPos(
+			mouseX-cb.draggingCell.circle.Size().Width/2,
+			mouseY-cb.draggingCell.circle.Size().Height/2,
+		))
+		cb.draggingCell.text.Move(fyne.NewPos(
+			mouseX-cb.draggingCell.text.Size().Width/2,
+			mouseY-cb.draggingCell.text.Size().Height/2,
+		))
+		cb.draggingCell.circle.Refresh()
+		cb.draggingCell.text.Refresh()
+	}
 }
 
 func (cb *chessBoard) DragEnd() {
-	println("拖完。")
+	//println("拖完。")
+	if cb.startDragCellIndex >= 0 {
+		cb.chessCells[cb.startDragCellIndex].text.Show()
+		cb.chessCells[cb.startDragCellIndex].circle.Show()
+		cb.draggingCell.text.Hide()
+		cb.draggingCell.circle.Hide()
+	}
+	cb.startDragCellIndex = -1
+	cb.draggingStarted = false
+	// todo: 走棋
+}
+
+func (cb *chessBoard) mouseXyToCellXy(mouseX, mouseY float32) (cellX, cellY int) {
+	cellX = int((mouseX - cb.orgX) / cb.cellSize)
+	cellY = int((mouseY - cb.orgY) / cb.cellSize)
+	return
 }
