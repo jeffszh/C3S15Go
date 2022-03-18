@@ -295,8 +295,10 @@ func (cb *chessBoard) DragEnd() {
 		mouseY := my + sy/2
 		toX, toY := cb.mouseXyToCellXy(mouseX, mouseY)
 		fromX, fromY := model.IndexToXY(cb.startDragCellIndex)
-		move := model.NewMoveByXY(fromX, fromY, toX, toY)
-		cb.scene.ApplyMove(move)
+		if model.AllInRange(fromX, fromY, toX, toY) {
+			move := model.NewMoveByXY(fromX, fromY, toX, toY)
+			cb.scene.ApplyMove(move)
+		}
 	}
 
 	cb.startDragCellIndex = -1

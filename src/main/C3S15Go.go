@@ -55,10 +55,10 @@ func updateStatusText() {
 	conf := model.AppConfig
 	mainScene := mainChessBoard.scene
 	statusText.Text = fmt.Sprintf(
-		"%s：%s  %s：%s    步数：%d  轮到【%s】走棋",
+		"%s：%s  %s：%s    %s",
 		conf.SoldierText, model.PlayerTypeText(conf.SoldierPlayType),
 		conf.CannonText, model.PlayerTypeText(conf.SoldierPlayType),
-		mainScene.MoveCount(), model.NewChess(mainScene.MovingSide()).Text(),
+		mainScene.SceneStatusInfo(),
 	)
 	statusText.Refresh()
 }
