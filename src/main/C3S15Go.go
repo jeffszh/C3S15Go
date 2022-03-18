@@ -48,6 +48,7 @@ func main() {
 }
 
 func restartGame() {
+	model.CancelAiRoutine()
 	mainChessBoard.scene.SetInitialContent()
 }
 
