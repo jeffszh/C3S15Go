@@ -57,7 +57,7 @@ func updateStatusText() {
 	statusText.Text = fmt.Sprintf(
 		"%s：%s  %s：%s    %s",
 		conf.SoldierText, model.PlayerTypeText(conf.SoldierPlayType),
-		conf.CannonText, model.PlayerTypeText(conf.SoldierPlayType),
+		conf.CannonText, model.PlayerTypeText(conf.CannonPlayType),
 		mainScene.SceneStatusInfo(),
 	)
 	statusText.Refresh()

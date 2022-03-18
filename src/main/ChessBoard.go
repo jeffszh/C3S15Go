@@ -241,7 +241,8 @@ func (cb *chessBoard) Dragged(event *fyne.DragEvent) {
 	if !cb.draggingStarted {
 		// 如果之前未drag，现在开始drag，不管位置是否合法，总要设置已开始drag的标志。
 		cb.draggingStarted = true
-		if 0 <= cellX && cellX < 5 &&
+		if !cb.scene.GameOver() &&
+			0 <= cellX && cellX < 5 &&
 			0 <= cellY && cellY < 5 {
 			cellInd := model.XyToIndex(cellX, cellY)
 			if cb.scene.ChessList()[cellInd].Type() == cb.scene.MovingSide() {
