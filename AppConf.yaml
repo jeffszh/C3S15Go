@@ -1,0 +1,9 @@
+app_title: 跳猫捉老鼠 Go语言版
+soldier_text: 鼠
+cannon_text: 猫
+soldier_play_type: 1
+cannon_play_type: 0
+ai_depth: 5
+player_type_human_text: 人脑
+player_type_ai_text: 電腦
+player_type_net_text: 网友

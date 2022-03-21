@@ -8,6 +8,7 @@ import (
 	"github.com/lxn/win"
 	"image/jpeg"
 	"image/png"
+	"main/model"
 	"time"
 )
 
@@ -33,7 +34,7 @@ func main() {
 	mws := new(mainWndStuff)
 	mws.chessBoardBackground = bkBmp
 	mainWnd := MainWindow{
-		Title:   "三炮十五兵 Go语言版",
+		Title:   model.AppConfig.AppTitle,
 		MinSize: Size{Width: 600, Height: 400},
 		Bounds: Rectangle{
 			X:      (int(screenWidth) - wndWidth) / 2,

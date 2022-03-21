@@ -7,4 +7,5 @@ require (
 	github.com/lxn/win v0.0.0-20210218163916-a377121e959e // indirect
 	golang.org/x/sys v0.0.0-20220224120231-95c6836cb0e7 // indirect
 	gopkg.in/Knetic/govaluate.v3 v3.0.0 // indirect
+	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
