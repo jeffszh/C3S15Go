@@ -9,12 +9,15 @@ import (
 	"fyne.io/fyne/v2/widget"
 	"main/model"
 	"main/theme"
+	"math/rand"
+	"time"
 )
 
 var mainChessBoard = NewChessBoard()
 var statusText *widget.Label
 
 func main() {
+	rand.Seed(time.Now().UnixNano())
 	//os.Setenv("FYNE_FONT", "C:\\Windows\\Fonts\\SIMYOU.TTF")
 	appMain := app.New()
 	appMain.Settings().SetTheme(theme.AppTheme)
