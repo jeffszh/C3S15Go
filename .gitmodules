@@ -1,0 +1,3 @@
+[submodule "src/main/model"]
+	path = src/main/model
+	url = git@gitee.com:jeffszh/c3-s15-go-model.git
