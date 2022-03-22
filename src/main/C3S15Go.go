@@ -29,7 +29,7 @@ func main() {
 	cbs := NewChessBoard(&mainWndPtr, bkBmp)
 	mainWnd := MainWindow{
 		Title:   model.AppConfig.AppTitle,
-		MinSize: Size{Width: 600, Height: 400},
+		//MinSize: Size{Width: 600, Height: 400},
 		Bounds: Rectangle{
 			X:      (int(screenWidth) - wndWidth) / 2,
 			Y:      (int(screenHeight) - wndHeight) / 2,
