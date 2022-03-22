@@ -28,7 +28,7 @@ func main() {
 	var mainWndPtr *walk.MainWindow
 	cbs := NewChessBoard(&mainWndPtr, bkBmp)
 	mainWnd := MainWindow{
-		Title:   model.AppConfig.AppTitle,
+		Title: model.AppConfig.AppTitle,
 		//MinSize: Size{Width: 600, Height: 400},
 		Bounds: Rectangle{
 			X:      (int(screenWidth) - wndWidth) / 2,
@@ -44,7 +44,10 @@ func main() {
 				Children: []Widget{
 					HSpacer{},
 					PushButton{
-						Text: "按钮，很多个字的按钮",
+						Text: "重新开始",
+						OnClicked: func() {
+							cbs.Scene().SetInitialContent()
+						},
 					},
 					HSpacer{},
 				},

@@ -1,6 +1,6 @@
 app_title: 跳猫捉老鼠 Go语言版
 soldier_text: 鼠
-cannon_text: 猫
+cannon_text: 貓
 soldier_play_type: 1
 cannon_play_type: 0
 ai_depth: 5

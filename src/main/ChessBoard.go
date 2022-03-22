@@ -3,11 +3,13 @@ package main
 import (
 	"github.com/lxn/walk"
 	"github.com/lxn/walk/declarative"
+	"main/model"
 )
 
 const (
-	chessDiameterRatio = 0.8
-	chessTextSizeRatio = 0.44
+	chessDiameterRatio   = 0.8
+	chessTextSizeRatio   = 0.44
+	chessTextOffsetRatio = 0.098
 
 	chessBoardMinWidth = 300
 	borderWidth        = 20
@@ -24,6 +26,8 @@ type chessBoardStruct struct {
 	orgX, orgY int
 	// 棋盘格大小
 	cellSize int
+
+	scene model.Scene
 }
 
 // ChessBoard 棋盘
@@ -31,6 +35,7 @@ type ChessBoard interface {
 	Declare() *declarative.CustomWidget
 	MainWnd() *walk.MainWindow
 	OnPaint(canvas *walk.Canvas, updateBounds walk.Rectangle) error
+	Scene() model.Scene
 }
 
 // NewChessBoard 创建ChessBoard
@@ -47,6 +52,10 @@ func NewChessBoard(mainWndToBeAssign **walk.MainWindow, chessBoardBackground *wa
 	cbs.InvalidatesOnResize = true
 	cbs.MinSize = declarative.Size{Width: chessBoardMinWidth, Height: chessBoardMinWidth}
 	cbs.Paint = cbs.OnPaint
+	cbs.scene = model.NewScene()
+	cbs.scene.SetOnChange(func(scene model.Scene) {
+		_ = cbs.chessBoard.Invalidate()
+	})
 	return &cbs
 }
 
@@ -123,6 +132,51 @@ func (cbs *chessBoardStruct) OnPaint(canvas *walk.Canvas, _ walk.Rectangle) erro
 			walk.Point{X: orgX + i*cellSize, Y: orgY},
 			walk.Point{X: orgX + i*cellSize, Y: orgY + 5*cellSize})
 	}
+	defer thinnerPen.Dispose()
+	defer thickerPen.Dispose()
+	defer brush.Dispose()
 
+	// 画棋子
+	chessList := cbs.scene.ChessList()
+	for cellY := 0; cellY < 5; cellY++ {
+		for cellX := 0; cellX < 5; cellX++ {
+			ind := model.XyToIndex(cellX, cellY)
+			chess := chessList[ind]
+			r, g, b, _ := chess.Color().RGBA()
+			cellColor := walk.RGB(byte(r), byte(g), byte(b))
+			brush, _ := walk.NewSolidColorBrush(cellColor)
+			pen, _ := walk.NewGeometricPen(walk.PenSolid, 3, brush)
+			whiteBrush, _ := walk.NewSolidColorBrush(walk.RGB(255, 255, 255))
+			text := chess.Text()
+			visible := chess.Visible()
+
+			if visible {
+				// 圆圈
+				rect := walk.Rectangle{
+					X:      orgX + cellX*cellSize + int((1-chessDiameterRatio)/2*float64(cellSize)),
+					Y:      orgY + cellY*cellSize + int((1-chessDiameterRatio)/2*float64(cellSize)),
+					Width:  int(float64(cellSize) * chessDiameterRatio),
+					Height: int(float64(cellSize) * chessDiameterRatio),
+				}
+				_ = canvas.FillEllipsePixels(whiteBrush, rect)
+				_ = canvas.DrawEllipsePixels(pen, rect)
+
+				// 文字
+				font, _ := walk.NewFont("楷体", int(float64(cellSize)*chessTextSizeRatio),
+					//font, _ := walk.NewFont("宋体", int(float64(cellSize)*chessTextSizeRatio),
+					walk.FontBold)
+				rect.Y += int(float64(cellSize) * chessTextOffsetRatio)
+				_ = canvas.DrawTextPixels(text, font, cellColor, rect, walk.TextCenter)
+				font.Dispose()
+			}
+			pen.Dispose()
+			brush.Dispose()
+			whiteBrush.Dispose()
+		}
+	}
 	return nil
+}
+
+func (cbs *chessBoardStruct) Scene() model.Scene {
+	return cbs.scene
 }
