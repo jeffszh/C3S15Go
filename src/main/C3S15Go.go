@@ -15,12 +15,6 @@ import (
 //go:embed images
 var imgs embed.FS
 
-type mainWndStuff struct {
-	mainWnd              *walk.MainWindow
-	chessBoard           *walk.CustomWidget
-	chessBoardBackground *walk.Bitmap
-}
-
 //os.Setenv("FYNE_FONT", "C:\\Windows\\Fonts\\SIMYOU.TTF")
 
 func main() {
@@ -31,8 +25,8 @@ func main() {
 	screenHeight := win.GetSystemMetrics(win.SM_CYSCREEN)
 	wndWidth := 800
 	wndHeight := 600
-	mws := new(mainWndStuff)
-	mws.chessBoardBackground = bkBmp
+	var mainWndPtr *walk.MainWindow
+	cbs := NewChessBoard(&mainWndPtr, bkBmp)
 	mainWnd := MainWindow{
 		Title:   model.AppConfig.AppTitle,
 		MinSize: Size{Width: 600, Height: 400},
@@ -55,12 +49,7 @@ func main() {
 					HSpacer{},
 				},
 			},
-			CustomWidget{
-				AssignTo:            &mws.chessBoard,
-				ClearsBackground:    false,
-				InvalidatesOnResize: true,
-				Paint:               mws.chessBoardOnPaint,
-			},
+			cbs.Declare(),
 			Composite{
 				Layout: HBox{},
 				Children: []Widget{
@@ -76,27 +65,27 @@ func main() {
 		},
 		OnSizeChanged: func() {
 			fmt.Printf("X=%d，Y=%d，宽度=%d，高度=%d\n",
-				mws.mainWnd.X(), mws.mainWnd.Y(),
-				mws.mainWnd.Width(), mws.mainWnd.Height())
+				cbs.MainWnd().X(), cbs.MainWnd().Y(),
+				cbs.MainWnd().Width(), cbs.MainWnd().Height())
 		},
 		OnBoundsChanged: func() {
 			fmt.Println("OnBoundsChanged: " +
-				fmt.Sprint(mws.mainWnd.Bounds()))
+				fmt.Sprint(cbs.MainWnd().Bounds()))
 		},
-		AssignTo: &mws.mainWnd,
+		AssignTo: &mainWndPtr,
 	}
 	go func() {
 		time.Sleep(3 * time.Second)
-		fmt.Println(mws.mainWnd.Bounds())
+		fmt.Println(cbs.MainWnd().Bounds())
 		mainWnd.Bounds.X = 300
-		fmt.Println(mws.mainWnd.Bounds())
+		fmt.Println(cbs.MainWnd().Bounds())
 	}()
 	pngFile, _ := imgs.Open("images/block.png")
 	img, _ := png.Decode(pngFile)
 	icon, _ := walk.NewIconFromImageForDPI(img, 300)
 	go func() {
 		time.Sleep(100 * time.Millisecond)
-		_ = mws.mainWnd.SetIcon(icon)
+		_ = cbs.MainWnd().SetIcon(icon)
 	}()
 	_, _ = mainWnd.Run()
 }
