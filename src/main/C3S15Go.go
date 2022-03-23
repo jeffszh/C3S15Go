@@ -26,7 +26,7 @@ func main() {
 	wndWidth := 800
 	wndHeight := 600
 	var mainWndPtr *walk.MainWindow
-	cbs := NewChessBoard(&mainWndPtr, bkBmp)
+	cb := NewChessBoard(&mainWndPtr, bkBmp)
 	mainWnd := MainWindow{
 		Title: model.AppConfig.AppTitle,
 		//MinSize: Size{Width: 600, Height: 400},
@@ -46,13 +46,13 @@ func main() {
 					PushButton{
 						Text: "重新开始",
 						OnClicked: func() {
-							cbs.Scene().SetInitialContent()
+							restartGame(cb)
 						},
 					},
 					HSpacer{},
 				},
 			},
-			cbs.Declare(),
+			cb.Declare(),
 			Composite{
 				Layout: HBox{},
 				Children: []Widget{
@@ -64,31 +64,44 @@ func main() {
 				},
 			},
 		},
-		OnMouseDown: func(x, y int, button walk.MouseButton) {
-		},
+		//OnMouseDown: func(x, y int, button walk.MouseButton) {
+		//	fmt.Printf("mouse down: %d, %d\n", x, y)
+		//},
+		//OnMouseMove: func(x, y int, button walk.MouseButton) {
+		//	fmt.Printf("mouse move: %d, %d\n", x, y)
+		//},
+		//OnMouseUp: func(x, y int, button walk.MouseButton) {
+		//	fmt.Printf("mouse up: %d, %d\n", x, y)
+		//},
 		OnSizeChanged: func() {
 			fmt.Printf("X=%d，Y=%d，宽度=%d，高度=%d\n",
-				cbs.MainWnd().X(), cbs.MainWnd().Y(),
-				cbs.MainWnd().Width(), cbs.MainWnd().Height())
+				cb.MainWnd().X(), cb.MainWnd().Y(),
+				cb.MainWnd().Width(), cb.MainWnd().Height())
 		},
 		OnBoundsChanged: func() {
 			fmt.Println("OnBoundsChanged: " +
-				fmt.Sprint(cbs.MainWnd().Bounds()))
+				fmt.Sprint(cb.MainWnd().Bounds()))
 		},
 		AssignTo: &mainWndPtr,
 	}
 	go func() {
-		time.Sleep(3 * time.Second)
-		fmt.Println(cbs.MainWnd().Bounds())
-		mainWnd.Bounds.X = 300
-		fmt.Println(cbs.MainWnd().Bounds())
+		//time.Sleep(3 * time.Second)
+		//fmt.Println(cbs.MainWnd().Bounds())
+		//mainWnd.Bounds.X = 300
+		//fmt.Println(cbs.MainWnd().Bounds())
+		time.Sleep(1 * time.Second)
+		restartGame(cb)
 	}()
 	pngFile, _ := imgs.Open("images/block.png")
 	img, _ := png.Decode(pngFile)
 	icon, _ := walk.NewIconFromImageForDPI(img, 300)
 	go func() {
 		time.Sleep(100 * time.Millisecond)
-		_ = cbs.MainWnd().SetIcon(icon)
+		_ = cb.MainWnd().SetIcon(icon)
 	}()
 	_, _ = mainWnd.Run()
+}
+
+func restartGame(board ChessBoard) {
+	board.Scene().SetInitialContent()
 }
