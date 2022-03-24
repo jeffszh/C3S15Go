@@ -145,6 +145,12 @@ func (cbs *chessBoardStruct) OnPaint(canvas *walk.Canvas, _ walk.Rectangle) erro
 		}
 	}
 
+	// 画最后一步箭头
+	//canvas.DrawPolylinePixels()
+	// lxn/walk有画多边形，但没有填充多边形，所以仍然是要用图片来做。
+	// 在这方面lxn/walk并不比fyne优胜。
+	//canvas.DrawImageStretchedPixels()
+
 	// 若正在拖动，画拖动影像。
 	if draggingChess != nil {
 		drawChess(canvas, mouseX, mouseY, cellSize, draggingChess)
