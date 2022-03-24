@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/lxn/walk"
 	"github.com/lxn/walk/declarative"
+	"image/png"
 	"main/model"
 	"time"
 )
@@ -15,6 +16,27 @@ const (
 	chessBoardMinWidth = 300
 	borderWidth        = 20
 )
+
+var (
+	leftArrowImg,
+	rightArrowImg,
+	upArrowImg,
+	downArrowImg walk.Image
+)
+
+func init() {
+	leftArrowImg = loadImage("images/left.png")
+	rightArrowImg = loadImage("images/right.png")
+	upArrowImg = loadImage("images/up.png")
+	downArrowImg = loadImage("images/down.png")
+}
+
+func loadImage(resourcePath string) walk.Image {
+	file, _ := imgs.Open(resourcePath)
+	img, _ := png.Decode(file)
+	bmp, _ := walk.NewBitmapFromImageForDPI(img, 96)
+	return bmp
+}
 
 // 棋盘内部结构
 type chessBoardStruct struct {
@@ -149,7 +171,52 @@ func (cbs *chessBoardStruct) OnPaint(canvas *walk.Canvas, _ walk.Rectangle) erro
 	//canvas.DrawPolylinePixels()
 	// lxn/walk有画多边形，但没有填充多边形，所以仍然是要用图片来做。
 	// 在这方面lxn/walk并不比fyne优胜。
-	//canvas.DrawImageStretchedPixels()
+	lastMove := cbs.Scene().LastMove()
+	if lastMove != nil {
+		fromX, fromY := lastMove.FromXY()
+		toX, toY := lastMove.ToXY()
+		var arrowImg walk.Image
+		switch {
+		case fromX > toX:
+			arrowImg = leftArrowImg
+		case fromX < toX:
+			arrowImg = rightArrowImg
+		case fromY > toY:
+			arrowImg = upArrowImg
+		case fromY < toY:
+			arrowImg = downArrowImg
+		}
+		deltaX := toX - fromX
+		deltaY := toY - fromY
+		var xScale, yScale int
+		if deltaX == 2 || deltaX == -2 {
+			xScale = 2
+		} else {
+			xScale = 1
+		}
+		if deltaY == 2 || deltaY == -2 {
+			yScale = 2
+		} else {
+			yScale = 1
+		}
+		rect := walk.Rectangle{
+			X:      orgX,
+			Y:      orgY,
+			Width:  cellSize * xScale,
+			Height: cellSize * yScale,
+		}
+		if fromX != toX {
+			rect.X += cellSize / 2
+		}
+		if fromY != toY {
+			rect.Y += cellSize / 2
+		}
+		minX := min(fromX, toX)
+		minY := min(fromY, toY)
+		rect.X += minX * cellSize
+		rect.Y += minY * cellSize
+		_ = canvas.DrawImageStretchedPixels(arrowImg, rect)
+	}
 
 	// 若正在拖动，画拖动影像。
 	if draggingChess != nil {
