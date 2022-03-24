@@ -33,7 +33,7 @@ type chessBoardStruct struct {
 
 // ChessBoard 棋盘
 type ChessBoard interface {
-	Declare() *declarative.CustomWidget
+	Declare() *declarative.Composite
 	MainWnd() *walk.MainWindow
 	OnPaint(canvas *walk.Canvas, updateBounds walk.Rectangle) error
 	Scene() model.Scene
@@ -65,8 +65,19 @@ func NewChessBoard(mainWndToBeAssign **walk.MainWindow, chessBoardBackground *wa
 
 // Declare 声明
 // 返回声明期的结构体
-func (cbs *chessBoardStruct) Declare() *declarative.CustomWidget {
-	return &cbs.CustomWidget
+func (cbs *chessBoardStruct) Declare() *declarative.Composite {
+	return &declarative.Composite{
+		Layout: declarative.HBox{},
+		Children: []declarative.Widget{
+			//declarative.HSpacer{},
+			cbs,
+			//declarative.CustomWidget{
+			//	MinSize: declarative.Size{Width: 0, Height: 0},
+			//	MaxSize: declarative.Size{Width: 0, Height: 0},
+			//},
+			//declarative.HSpacer{},
+		},
+	}
 }
 
 // MainWnd 取运行期的主窗口
