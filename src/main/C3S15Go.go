@@ -115,5 +115,6 @@ func main() {
 }
 
 func restartGame(board ChessBoard) {
+	model.CancelAiRoutine()
 	board.Scene().SetInitialContent()
 }
