@@ -4,6 +4,7 @@ import (
 	"github.com/lxn/walk"
 	"github.com/lxn/walk/declarative"
 	"main/model"
+	"time"
 )
 
 const (
@@ -28,6 +29,9 @@ type chessBoardStruct struct {
 	cellSize int
 
 	scene model.Scene
+
+	// 棋局状态改变时向上通知的回调
+	onStatusChange func()
 }
 
 // ChessBoard 棋盘
@@ -42,10 +46,12 @@ type ChessBoard interface {
 // 参数：mainWndToBeAssign 即将赋值 mainWnd 的指针变量的指针
 //（这是lxn/walk的奇特之处，declarative的时候并不知道，运行时才知道赋值到哪了。）
 // 参数：chessBoardBackground 背景图片
-func NewChessBoard(mainWndToBeAssign **walk.MainWindow, chessBoardBackground *walk.Bitmap) ChessBoard {
+func NewChessBoard(mainWndToBeAssign **walk.MainWindow, chessBoardBackground *walk.Bitmap,
+	onStatusChange func()) ChessBoard {
 	cbs := chessBoardStruct{
 		mainWnd:              mainWndToBeAssign,
 		chessBoardBackground: chessBoardBackground,
+		onStatusChange:       onStatusChange,
 	}
 	cbs.AssignTo = &cbs.chessBoard
 	cbs.ClearsBackground = false
@@ -55,6 +61,7 @@ func NewChessBoard(mainWndToBeAssign **walk.MainWindow, chessBoardBackground *wa
 	cbs.scene = model.NewScene()
 	cbs.scene.SetOnChange(func(scene model.Scene) {
 		_ = cbs.chessBoard.Invalidate()
+		onStatusChange()
 	})
 	cbs.OnMouseDown = cbs.mouseDown
 	cbs.OnMouseMove = cbs.mouseMove
@@ -207,6 +214,9 @@ func (cbs *chessBoardStruct) mouseDown(x, y int, button walk.MouseButton) {
 	if button != walk.LeftButton {
 		return
 	}
+	if cbs.Scene().GameOver() {
+		return
+	}
 	mouseX = x
 	mouseY = y
 	cellX, cellY := cbs.mouseXyToCellXy(x, y)
@@ -236,9 +246,20 @@ func (cbs *chessBoardStruct) mouseUp(x, y int, button walk.MouseButton) {
 	if button != walk.LeftButton {
 		return
 	}
+	if draggingChess == nil {
+		return
+	}
+
+	// 走棋
+	toX, toY := cbs.mouseXyToCellXy(x, y)
+	move := model.NewMoveByXY(startDragCellX, startDragCellY, toX, toY)
+	go func() {
+		time.Sleep(10 * time.Millisecond)
+		cbs.Scene().ApplyMove(move)
+	}()
+
 	draggingChess = nil
 	_ = cbs.chessBoard.Invalidate()
-	// todo: 走棋
 }
 
 func (cbs *chessBoardStruct) mouseXyToCellXy(mouseX, mouseY int) (cellX, cellY int) {

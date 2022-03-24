@@ -26,7 +26,12 @@ func main() {
 	wndWidth := 800
 	wndHeight := 600
 	var mainWndPtr *walk.MainWindow
-	cb := NewChessBoard(&mainWndPtr, bkBmp)
+	var statusLabel *walk.Label
+	var cb ChessBoard
+	onChessSceneChange := func() {
+		_ = statusLabel.SetText(cb.Scene().SceneStatusInfo())
+	}
+	cb = NewChessBoard(&mainWndPtr, bkBmp, onChessSceneChange)
 	mainWnd := MainWindow{
 		Title: model.AppConfig.AppTitle,
 		//MinSize: Size{Width: 600, Height: 400},
@@ -57,8 +62,15 @@ func main() {
 				Layout: HBox{},
 				Children: []Widget{
 					HSpacer{},
-					PushButton{
-						Text: "SCREAM",
+					//PushButton{
+					//	Text: "SCREAM",
+					//},
+					//TextLabel{
+					//	Text: "就绪",
+					//},
+					Label{
+						Text:     "就绪",
+						AssignTo: &statusLabel,
 					},
 					HSpacer{},
 				},
@@ -89,7 +101,7 @@ func main() {
 		//fmt.Println(cbs.MainWnd().Bounds())
 		//mainWnd.Bounds.X = 300
 		//fmt.Println(cbs.MainWnd().Bounds())
-		time.Sleep(1 * time.Second)
+		time.Sleep(300 * time.Millisecond)
 		restartGame(cb)
 	}()
 	pngFile, _ := imgs.Open("images/block.png")
