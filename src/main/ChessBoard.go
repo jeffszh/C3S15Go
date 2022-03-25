@@ -68,6 +68,7 @@ type ChessBoard interface {
 // 参数：mainWndToBeAssign 即将赋值 mainWnd 的指针变量的指针
 //（这是lxn/walk的奇特之处，declarative的时候并不知道，运行时才知道赋值到哪了。）
 // 参数：chessBoardBackground 背景图片
+// 参数：onStatusChange 棋盘状态改变的时候，通知上层。
 func NewChessBoard(mainWndToBeAssign **walk.MainWindow, chessBoardBackground *walk.Bitmap,
 	onStatusChange func()) ChessBoard {
 	cbs := chessBoardStruct{

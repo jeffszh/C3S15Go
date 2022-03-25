@@ -28,10 +28,11 @@ func main() {
 	var mainWndPtr *walk.MainWindow
 	var statusLabel *walk.Label
 	var cb ChessBoard
-	onChessSceneChange := func() {
+	updateStatusLabelFunc := func() {
 		_ = statusLabel.SetText(cb.Scene().SceneStatusInfo())
 	}
-	cb = NewChessBoard(&mainWndPtr, bkBmp, onChessSceneChange)
+	cb = NewChessBoard(&mainWndPtr, bkBmp, updateStatusLabelFunc)
+	model.SetOnAiProgress(updateStatusLabelFunc)
 	mainWnd := MainWindow{
 		Title: model.AppConfig.AppTitle,
 		//MinSize: Size{Width: 600, Height: 400},
