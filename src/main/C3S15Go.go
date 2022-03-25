@@ -43,6 +43,7 @@ func main() {
 		topPane, bottomPane, nil, nil),
 		topPane, bottomPane, mainChessBoard))
 	mainChessBoard.onGameInfoChanged = updateStatusText
+	model.SetOnAiProgress(updateStatusText)
 	mainWnd.Resize(fyne.NewSize(800, 600))
 	// 无法指定窗口位置，但是却有居中，真奇葩。
 	mainWnd.CenterOnScreen()
